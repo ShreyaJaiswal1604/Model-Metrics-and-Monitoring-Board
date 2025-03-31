@@ -1,108 +1,81 @@
 import React, { useState } from 'react';
-import {
-  WizardStep,
-  Form,
-  FormGroup,
-  TextInput,
-  NumberInput,
-  Button,
-  Select,
-  SelectOption,
-  SelectVariant,
-  Alert,
-  Progress,
-  ProgressVariant
-} from '@patternfly/react-core';
+import { Button, Card, CardBody, Title, Alert, AlertActionCloseButton } from '@patternfly/react-core';
 
-export const DatasetSimulationStep: React.FC = () => {
-  const [nodes, setNodes] = useState<number>(50);
-  const [anomalyRate, setAnomalyRate] = useState<number>(5);
-  const [selectedZone, setSelectedZone] = useState<string>('North America');
-  const [isZoneOpen, setIsZoneOpen] = useState<boolean>(false);
-  const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const [simulationStatus, setSimulationStatus] = useState<string>('');
+const DataSimulation: React.FC = () => {
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
-  const zoneOptions = ['North America', 'Europe', 'Asia'];
+  const handleStartSimulation = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/start', { method: 'POST' });
+      if (response.ok) {
+        setIsSimulating(true);
+        setAlertMessage('Simulation started successfully.');
+        setAlertVisible(true);
+      } else {
+        throw new Error('Failed to start simulation.');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setAlertMessage(error.message);
+      } else {
+        setAlertMessage('An unknown error occurred.');
+      }
+      setAlertVisible(true);
+    }
+  };
 
-  const handleSimulate = () => {
-    setIsSimulating(true);
-    setSimulationStatus('Running simulation...');
-    // Simulate processing delay
-    setTimeout(() => {
-      setIsSimulating(false);
-      setSimulationStatus(`Simulation completed for ${nodes} nodes in ${selectedZone} with ${anomalyRate}% anomalies.`);
-    }, 2000);
+  const handleStopSimulation = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/stop', { method: 'POST' });
+      if (response.ok) {
+        setIsSimulating(false);
+        setAlertMessage('Simulation stopped successfully.');
+        setAlertVisible(true);
+      } else {
+        throw new Error('Failed to stop simulation.');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setAlertMessage(error.message);
+      } else {
+        setAlertMessage('An unknown error occurred.');
+      }
+      setAlertVisible(true);
+    }
   };
 
   return (
-    <WizardStep name="Dataset Simulation" id="header-second-step">
-      <Form isWidthLimited maxWidth="500px">
-        <FormGroup label="Number of Nodes" fieldId="num-nodes">
-          <NumberInput
-            value={nodes}
-            onChange={(event, value) => setNodes(value)}
-            onMinus={() => setNodes(nodes - 1)}
-            onPlus={() => setNodes(nodes + 1)}
-            inputName="num-nodes"
-            inputAriaLabel="Number of Nodes"
-            min={1}
-          />
-        </FormGroup>
-
-        <FormGroup label="Anomaly Rate (%)" fieldId="anomaly-rate">
-          <NumberInput
-            value={anomalyRate}
-            onChange={(event, value) => setAnomalyRate(value)}
-            onMinus={() => setAnomalyRate(Math.max(0, anomalyRate - 1))}
-            onPlus={() => setAnomalyRate(Math.min(100, anomalyRate + 1))}
-            inputName="anomaly-rate"
-            inputAriaLabel="Anomaly Rate"
-            min={0}
-            max={100}
-          />
-        </FormGroup>
-
-        <FormGroup label="Data Center Zone" fieldId="zone-select">
-          <Select
-            variant={SelectVariant.single}
-            aria-label="Select Zone"
-            onToggle={() => setIsZoneOpen(!isZoneOpen)}
-            onSelect={(event, selection) => {
-              setSelectedZone(selection as string);
-              setIsZoneOpen(false);
-            }}
-            selections={selectedZone}
-            isOpen={isZoneOpen}
-          >
-            {zoneOptions.map((zone, index) => (
-              <SelectOption key={index} value={zone} />
-            ))}
-          </Select>
-        </FormGroup>
-
-        <Button variant="primary" onClick={handleSimulate} isDisabled={isSimulating}>
-          {isSimulating ? 'Simulating...' : 'Run Simulation'}
-        </Button>
-
-        {simulationStatus && (
+    <Card>
+      <CardBody>
+        <Title headingLevel="h1">Data Simulation Control</Title>
+        {alertVisible && (
           <Alert
-            variant={isSimulating ? 'info' : 'success'}
-            title={simulationStatus}
-            isInline
-            style={{ marginTop: '1rem' }}
+            variant={isSimulating ? 'success' : 'danger'}
+            title={alertMessage}
+            actionClose={<AlertActionCloseButton onClose={() => setAlertVisible(false)} />}
           />
         )}
-
-        {isSimulating && (
-          <Progress
-            title="Simulation progress"
-            value={70}
-            variant={ProgressVariant.info}
-            measureLocation="inside"
-            style={{ marginTop: '1rem' }}
-          />
-        )}
-      </Form>
-    </WizardStep>
+        <Button
+          variant="primary"
+          onClick={handleStartSimulation}
+          isDisabled={isSimulating}
+          style={{ marginRight: '1rem', marginTop: '1rem' }}
+        >
+          Start Simulation
+        </Button>
+        <Button
+          variant="danger"
+          onClick={handleStopSimulation}
+          isDisabled={!isSimulating}
+          style={{ marginTop: '1rem' }}
+        >
+          Stop Simulation
+        </Button>
+      </CardBody>
+    </Card>
   );
 };
+
+export default DataSimulation;

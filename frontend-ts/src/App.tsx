@@ -180,7 +180,7 @@ import BrainIcon from '@patternfly/react-icons/dist/esm/icons/brain-icon';
 import TachometerAltIcon from '@patternfly/react-icons/dist/esm/icons/tachometer-alt-icon';
 import ChartLineIcon from '@patternfly/react-icons/dist/esm/icons/chart-line-icon';
 
-import { DatasetSimulationStep } from './components/DatasetSimulation';
+import DataSimulation from './components/DatasetSimulation';
 
 export const App: React.FunctionComponent = () => {
   const [expandedCard, setExpandedCard] = React.useState<string | null>(null);
@@ -339,7 +339,7 @@ export const App: React.FunctionComponent = () => {
       </WizardStep>
 
       <WizardStep name="Dataset Simulation" id="header-second-step">
-      <DatasetSimulationStep />
+      <DataSimulation />
       </WizardStep>
 
       <WizardStep name="Review" id="header-review-step" footer={{ nextButtonText: 'Finish' }}>

@@ -1,23 +1,24 @@
-version: '3.8'
-
 services:
   backend:
-      build: ./backend
-      container_name: backend
-      restart: always
-      depends_on:
-        - mongo
-      environment:
-        - NODE_ENV=production
-      ports:
-        - "5001:5001"
+    build: ./backend
+    container_name: backend
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "5001:5001"
+    networks:
+      - monitoring-net  # <--- add this
 
   mongo:
     image: mongo:latest
     container_name: mongo
     ports:
       - "27017:27017"
-
+    networks:
+      - monitoring-net  # <--- optional if you want them on the same network
 
   prometheus:
     image: prom/prometheus:latest
@@ -35,7 +36,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "4000:3000" # ✅ Port mapping changed: host 4000 → container 3000
+      - "4000:3000"
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
