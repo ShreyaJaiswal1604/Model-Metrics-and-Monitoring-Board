@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   backend:
     build: ./backend
@@ -10,15 +12,17 @@ services:
     ports:
       - "5001:5001"
     networks:
-      - monitoring-net  # <--- add this
+      - monitoring-net
 
   mongo:
     image: mongo:latest
     container_name: mongo
     ports:
       - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
     networks:
-      - monitoring-net  # <--- optional if you want them on the same network
+      - monitoring-net
 
   prometheus:
     image: prom/prometheus:latest
@@ -37,12 +41,24 @@ services:
     container_name: grafana
     ports:
       - "4000:3000"
+    environment:
+      - GF_SERVER_ROOT_URL=http://localhost:4000
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
     networks:
       - monitoring-net
+
+  frontend:
+    build: ./frontend-ts
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:3000"  # Maps container port 80 (nginx) to host port 3000
+    networks:
+      - monitoring-net
+
 
 volumes:
   mongo-data:

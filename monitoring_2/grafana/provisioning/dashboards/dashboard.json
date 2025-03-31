@@ -240,8 +240,8 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "My Data Center Metrics Dashboard",
-    "uid": "my-data-center-dashboard",
+    "title": "HeatGuard Metrics Dashboard",
+    "uid": "heatguard-dashboard",
     "version": 1
   }
   
